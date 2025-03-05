@@ -11,10 +11,7 @@ import LetterGrid from "./LetterGrid";
 import ConfettiEffect from "./ConfettiEffect";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  ClickTooltip,
 } from "./ui/tooltip";
 
 interface GameOverModalProps {
@@ -63,24 +60,20 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
       >
         {/* Close icon with tooltip */}
         <div className="relative">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button 
-                  className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-                  onClick={() => {}}
-                  autoFocus={false}
-                  tabIndex={-1}
-                >
-                  <Cross2Icon className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="left" sideOffset={5} align="center">
-                <p>There is no escape from nested modals.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <ClickTooltip 
+            content={<p>There is no escape from nested modals.</p>}
+            side="left"
+          >
+            <button 
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+              onClick={() => {}}
+              autoFocus={false}
+              tabIndex={-1}
+            >
+              <Cross2Icon className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+          </ClickTooltip>
         </div>
 
         {/* Show confetti effect when the player wins */}

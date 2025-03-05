@@ -12,10 +12,7 @@ import LetterGrid from "./LetterGrid";
 import VirtualKeyboard from "./VirtualKeyboard";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  ClickTooltip,
 } from "./ui/tooltip";
 
 interface GuessModalProps {
@@ -223,16 +220,16 @@ const GuessModal: React.FC<GuessModalProps> = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
           style={{
             width: isNestedModal 
-              ? `calc(95% - ${nestedLevel * 40}px)` 
-              : '95%',
+              ? `calc(85% - ${nestedLevel * 80}px)` 
+              : '80%',
             maxWidth: isNestedModal 
-              ? `calc(600px - ${nestedLevel * 40}px)` 
-              : '600px',
+              ? `calc(800px - ${nestedLevel * 80}px)` 
+              : '800px',
             height: isNestedModal 
-              ? `calc(80vh - ${nestedLevel * 40}px)` 
+              ? `calc(80vh - ${nestedLevel * 80}px)` 
               : '80vh',
             maxHeight: isNestedModal 
-              ? `calc(800px - ${nestedLevel * 40}px)` 
+              ? `calc(800px - ${nestedLevel * 80}px)` 
               : '800px',
             position: 'fixed',
             top: '50%',
@@ -248,41 +245,37 @@ const GuessModal: React.FC<GuessModalProps> = ({
         >
           {/* Close icon with tooltip */}
           <div className="relative">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button 
-                    className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-                    onClick={() => {}}
-                    autoFocus={false}
-                    tabIndex={-1}
-                  >
-                    <Cross2Icon className="h-4 w-4" />
-                    <span className="sr-only">Close</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="left" sideOffset={5} align="center">
-                  <p>There is no escape from nested modals.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <ClickTooltip 
+              content={<p>There is no escape from nested modals.</p>}
+              side="left"
+            >
+              <button 
+                className="absolute right-1 top-1 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+                onClick={() => {}}
+                autoFocus={false}
+                tabIndex={-1}
+              >
+                <Cross2Icon className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
+            </ClickTooltip>
           </div>
 
-          <DialogHeader>
+          <DialogHeader className="mb-0">
             <DialogTitle className="text-center text-xl font-bold">
               {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct")) 
                 ? "Game Over" 
-                : "Make Your Guess"}
+                : "Modle"}
             </DialogTitle>
             <DialogDescription className="text-center">
               {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))
                 ? `The word was ${targetWord.toUpperCase()}`
-                : "Try to guess the word!"}
+                : "like Wordle, but the word is always MODAL"}
             </DialogDescription>
           </DialogHeader>
 
           {(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) ? (
-            <div className="space-y-4 my-4">
+            <div className="space-y-4 my-0">
               <h3 className="text-lg font-semibold text-center">Your Guesses:</h3>
               <div className="flex justify-center">
                 <LetterGrid
@@ -295,9 +288,9 @@ const GuessModal: React.FC<GuessModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="space-y-4 my-4">
+            <div className="space-y-4 my-0">
               <div className="flex flex-col items-center">
-                <h3 className="text-md font-medium mb-2">Previous Guesses:</h3>
+                {/* <h3 className="text-md font-medium mb-2">Previous Guesses:</h3> */}
                 <div className="flex justify-center">
                   <LetterGrid
                     guesses={allGuesses.map(g => g.word)}
@@ -311,7 +304,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
               </div>
 
               <div className="mt-4">
-                <h3 className="text-md font-medium mb-2 text-center">Enter your next guess:</h3>
+                {/* <h3 className="text-md font-medium mb-2 text-center">Enter your next guess:</h3>
                 <div className="flex justify-center mb-2">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <div
@@ -329,7 +322,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
                       {nextGuess[i] ? nextGuess[i].toUpperCase() : ""}
                     </div>
                   ))}
-                </div>
+                </div> */}
                 <div className="flex justify-center mt-4">
                   <VirtualKeyboard
                     onKeyPress={handleKeyPress}

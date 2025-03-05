@@ -25,4 +25,27 @@ const TooltipContent = React.forwardRef<
 ))
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+// Custom Tooltip component that only opens on click
+const ClickTooltip = ({ children, content, side = "top", sideOffset = 4 }: { 
+  children: React.ReactNode, 
+  content: React.ReactNode, 
+  side?: "top" | "right" | "bottom" | "left", 
+  sideOffset?: number 
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  return (
+    <TooltipProvider>
+      <Tooltip open={isOpen} onOpenChange={setIsOpen}>
+        <TooltipTrigger asChild onClick={() => setIsOpen(!isOpen)}>
+          {children}
+        </TooltipTrigger>
+        <TooltipContent side={side} sideOffset={sideOffset}>
+          {content}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, ClickTooltip }
