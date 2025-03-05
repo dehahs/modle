@@ -3,11 +3,13 @@ import React, { useState } from "react";
 interface VirtualKeyboardProps {
   onKeyPress?: (key: string) => void;
   keyStates?: Record<string, "correct" | "present" | "absent" | "default">;
+  compact?: boolean;
 }
 
 const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   onKeyPress = () => {},
   keyStates = {},
+  compact = false,
 }) => {
   // Define keyboard layout
   const keyboardRows = [
@@ -32,30 +34,33 @@ const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
       case "absent":
         return "bg-gray-500 text-white";
       default:
-        return "bg-gray-200 text-gray-800 hover:bg-gray-300";
+        return "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
     }
   };
 
   return (
-    <div className="w-full max-w-[500px] bg-white p-4 rounded-lg shadow-md">
+    <div className={`w-full max-w-[500px] ${compact ? 'p-1' : 'p-4'} rounded-lg`}>
       {keyboardRows.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center mb-2">
+        <div key={rowIndex} className="flex justify-center mb-1">
           {row.map((key) => (
             <button
               key={key}
               onClick={() => handleKeyClick(key)}
               className={`
                 ${getKeyColor(key)}
-                ${key === "ENTER" || key === "BACKSPACE" ? "px-2 text-xs" : "px-3"}
-                py-4 m-1 rounded font-bold transition-colors duration-200
-                flex items-center justify-center min-w-[40px]
+                ${key === "ENTER" || key === "BACKSPACE" ? 
+                  compact ? "px-1 text-[10px]" : "px-2 text-xs" : 
+                  compact ? "px-1" : "px-3"}
+                ${compact ? "py-2 m-[2px] min-w-[28px]" : "py-4 m-1 min-w-[40px]"}
+                rounded font-bold transition-colors duration-200
+                flex items-center justify-center
               `}
             >
               {key === "BACKSPACE" ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
+                  width={compact ? "16" : "20"}
+                  height={compact ? "16" : "20"}
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

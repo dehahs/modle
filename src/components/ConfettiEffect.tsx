@@ -21,8 +21,8 @@ interface ConfettiEffectProps {
 
 const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
   isActive = true,
-  duration = 3000,
-  pieceCount = 100,
+  duration = 5000,
+  pieceCount = 200,
 }) => {
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
   const [isVisible, setIsVisible] = useState(isActive);
@@ -31,12 +31,16 @@ const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
   useEffect(() => {
     if (isActive) {
       const colors = [
-        "#ff0000",
-        "#00ff00",
-        "#0000ff",
-        "#ffff00",
-        "#ff00ff",
-        "#00ffff",
+        "#FF1493", // Deep Pink
+        "#00FF00", // Lime Green
+        "#FFD700", // Gold
+        "#00BFFF", // Deep Sky Blue
+        "#FF4500", // Orange Red
+        "#9400D3", // Dark Violet
+        "#FF6347", // Tomato
+        "#32CD32", // Lime Green
+        "#1E90FF", // Dodger Blue
+        "#FFFF00", // Yellow
       ];
       const newConfetti: ConfettiPiece[] = [];
 
@@ -44,13 +48,13 @@ const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
         newConfetti.push({
           id: i,
           x: Math.random() * 100, // percentage across screen
-          y: -10 - Math.random() * 10, // start above viewport
-          size: 5 + Math.random() * 10,
+          y: -10 - Math.random() * 20, // start above viewport
+          size: 5 + Math.random() * 15,
           color: colors[Math.floor(Math.random() * colors.length)],
           rotation: Math.random() * 360,
-          xVelocity: -1 + Math.random() * 2,
-          yVelocity: 1 + Math.random() * 3,
-          rotationVelocity: -3 + Math.random() * 6,
+          xVelocity: -2 + Math.random() * 4,
+          yVelocity: 1 + Math.random() * 5,
+          rotationVelocity: -5 + Math.random() * 10,
         });
       }
 
@@ -69,7 +73,7 @@ const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden bg-transparent">
+    <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden bg-transparent">
       {confetti.map((piece) => (
         <motion.div
           key={piece.id}

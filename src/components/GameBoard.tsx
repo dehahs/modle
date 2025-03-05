@@ -4,7 +4,10 @@ import VirtualKeyboard from "./VirtualKeyboard";
 import GuessModal from "./GuessModal";
 
 interface GameBoardProps {
-  onGameOver?: (won: boolean, attempts: number) => void;
+  onGameOver?: (won: boolean, attempts: number, guesses: Array<{
+    word: string;
+    result: Array<"correct" | "present" | "absent" | "empty">;
+  }>) => void;
   targetWord?: string;
   maxAttempts?: number;
 }
@@ -12,7 +15,7 @@ interface GameBoardProps {
 const GameBoard: React.FC<GameBoardProps> = ({
   onGameOver = () => {},
   targetWord = "MODAL",
-  maxAttempts = 5,
+  maxAttempts = 6,
 }) => {
   // Game state
   const [guesses, setGuesses] = useState<
@@ -74,7 +77,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
     // Check if the game is over
     if (currentGuess === targetWord) {
       setGameStatus("won");
-      onGameOver(true, 1); // First guess was correct
+      onGameOver(true, 1, [...guesses, newGuess]); // First guess was correct
     } else {
       // First incorrect guess - switch to modal mode
       setFirstIncorrectGuess(newGuess);
@@ -116,9 +119,14 @@ const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   // Handle game over from the modal
-  const handleModalGameOver = (won: boolean, attempts: number) => {
+  const handleModalGameOver = (won: boolean, attempts: number, modalGuesses: Array<{
+    word: string;
+    result: Array<"correct" | "present" | "absent" | "empty">;
+  }> = []) => {
     setGameStatus(won ? "won" : "lost");
-    onGameOver(won, attempts);
+    
+    // The first guess is already included in modalGuesses, so we don't need to add it again
+    onGameOver(won, attempts, modalGuesses);
   };
 
   // Create a current guess row for display
@@ -156,9 +164,10 @@ const GameBoard: React.FC<GameBoardProps> = ({
       {/* Letter Grid - only shown before first incorrect guess */}
       <div className="flex-grow flex items-center justify-center w-full">
         <LetterGrid
-          guesses={getAllGuesses()}
-          maxGuesses={maxAttempts}
+          guesses={getAllGuesses().map(g => g.word)}
+          statuses={getAllGuesses().map(g => g.result)}
           wordLength={targetWord.length}
+          maxGuesses={maxAttempts}
         />
       </div>
 
@@ -173,7 +182,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
           isOpen={true}
           onClose={() => {}} // No-op to prevent closing
           currentGuess={firstIncorrectGuess}
-          previousGuesses={[]}
+          previousGuesses={[]} // Don't pass any previous guesses, as the first incorrect guess is already the currentGuess
           targetWord={targetWord}
           maxAttempts={maxAttempts}
           onGameOver={handleModalGameOver}

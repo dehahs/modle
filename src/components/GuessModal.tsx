@@ -5,10 +5,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import LetterGrid from "./LetterGrid";
 import VirtualKeyboard from "./VirtualKeyboard";
+import { Cross2Icon } from "@radix-ui/react-icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface GuessModalProps {
   isOpen?: boolean;
@@ -26,7 +34,10 @@ interface GuessModalProps {
   nestedLevel?: number;
   targetWord?: string;
   maxAttempts?: number;
-  onGameOver?: (won: boolean, attempts: number) => void;
+  onGameOver?: (won: boolean, attempts: number, guesses: Array<{
+    word: string;
+    result: Array<"correct" | "present" | "absent" | "empty">;
+  }>) => void;
   attemptNumber?: number;
   totalGuessesUsed?: number;
 }
@@ -40,7 +51,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
   isNestedModal = false,
   nestedLevel = 1,
   targetWord = "MODAL",
-  maxAttempts = 5,
+  maxAttempts = 6,
   onGameOver = () => {},
   attemptNumber = 1,
   totalGuessesUsed = 1, // Default to 1 since we're showing this after the first guess
@@ -158,17 +169,20 @@ const GuessModal: React.FC<GuessModalProps> = ({
     // Check if game is over
     if (guess === targetWord) {
       // Win condition
-      onGameOver(true, newGuessesUsed);
+      onGameOver(true, newGuessesUsed, updatedGuesses);
     } else if (newGuessesUsed >= maxAttempts) {
       // Lose condition
-      onGameOver(false, maxAttempts);
+      onGameOver(false, maxAttempts, updatedGuesses);
     } else {
       // Continue with a new nested modal
+      // For the first nested modal, use level 1
+      const newNestedLevel = isNestedModal ? nestedLevel + 1 : 1;
+      
       setNestedModals([
         ...nestedModals,
         {
           guess: newGuess,
-          level: nestedModals.length + 1,
+          level: newNestedLevel,
           guessNumber: newGuessesUsed,
         },
       ]);
@@ -191,84 +205,153 @@ const GuessModal: React.FC<GuessModalProps> = ({
 
   // Get all previous guesses to display
   const getAllPreviousGuesses = () => {
-    // For the first modal, just show the current guess
+    // For the first modal, show the current guess and any previous guesses
     if (!isNestedModal) {
-      return [currentGuess];
+      return [...previousGuesses, currentGuess];
     }
 
     // For nested modals, collect all guesses up to this point
-    // This includes the original guess plus all nested modal guesses
-    const allPreviousGuesses = [];
-
-    // Add the current guess for this modal
-    allPreviousGuesses.push(currentGuess);
-
-    return allPreviousGuesses;
+    // This includes all previous guesses plus the current guess for this modal
+    return [...previousGuesses, currentGuess];
   };
 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={() => {}}>
-        <DialogContent
-          className="bg-white dark:bg-gray-800 w-[90%] max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+        <DialogContent 
+          className="p-4 overflow-y-auto"
+          onOpenAutoFocus={(e) => e.preventDefault()}
           style={{
-            position: "fixed",
+            width: isNestedModal 
+              ? `calc(95% - ${nestedLevel * 40}px)` 
+              : '95%',
+            maxWidth: isNestedModal 
+              ? `calc(600px - ${nestedLevel * 40}px)` 
+              : '600px',
+            height: isNestedModal 
+              ? `calc(80vh - ${nestedLevel * 40}px)` 
+              : '80vh',
+            maxHeight: isNestedModal 
+              ? `calc(800px - ${nestedLevel * 40}px)` 
+              : '800px',
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: `translate(-50%, -50%)`,
             zIndex: 50 + nestedLevel,
-            marginTop: `${nestedLevel * 10}px`,
-            marginLeft: `${nestedLevel * 10}px`,
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            backgroundColor: 'white',
+            color: 'black',
+            borderRadius: '0.5rem',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           }}
         >
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">
-              {isNestedModal ? `Incorrect Guess #${guessesUsed}` : "Your Guess"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="py-4">
-            {/* Previous Guesses */}
-            <div className="mb-4">
-              <h3 className="text-sm font-medium mb-2">Previous Guesses:</h3>
-              <div className="scale-[0.85] origin-top">
-                <LetterGrid
-                  guesses={getAllPreviousGuesses()}
-                  maxGuesses={getAllPreviousGuesses().length}
-                  wordLength={5}
-                />
-              </div>
-            </div>
-
-            {/* Next Guess Input */}
-            <div className="mt-6">
-              <h3 className="text-sm font-medium mb-2">
-                Enter your next guess:
-              </h3>
-              <div className="flex justify-center mb-4">{getEmptyBoxes()}</div>
-
-              <div className="mt-4 w-full">
-                <VirtualKeyboard
-                  onKeyPress={handleKeyPress}
-                  keyStates={keyStates}
-                />
-              </div>
-            </div>
+          {/* Close icon with tooltip */}
+          <div className="relative">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+                    onClick={() => {}}
+                    autoFocus={false}
+                    tabIndex={-1}
+                  >
+                    <Cross2Icon className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="left" sideOffset={5} align="center">
+                  <p>There is no escape from nested modals.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
-          <DialogFooter className="flex justify-between items-center">
-            <p className="text-sm text-gray-500">
-              {maxAttempts - guessesUsed} guesses remaining
-            </p>
-            <Button
-              onClick={() => {
-                if (nextGuess.length === 5) {
-                  submitGuess(nextGuess);
-                  setNextGuess("");
-                }
-              }}
-              disabled={nextGuess.length !== 5}
-            >
-              Submit
-            </Button>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct")) 
+                ? "Game Over" 
+                : "Make Your Guess"}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))
+                ? `The word was ${targetWord.toUpperCase()}`
+                : "Try to guess the word!"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) ? (
+            <div className="space-y-4 my-4">
+              <h3 className="text-lg font-semibold text-center">Your Guesses:</h3>
+              <div className="flex justify-center">
+                <LetterGrid
+                  guesses={allGuesses.map(g => g.word)}
+                  statuses={allGuesses.map(g => g.result)}
+                  wordLength={5}
+                  maxGuesses={maxAttempts}
+                  compact={true}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 my-4">
+              <div className="flex flex-col items-center">
+                <h3 className="text-md font-medium mb-2">Previous Guesses:</h3>
+                <div className="flex justify-center">
+                  <LetterGrid
+                    guesses={allGuesses.map(g => g.word)}
+                    statuses={allGuesses.map(g => g.result)}
+                    currentGuess={nextGuess}
+                    wordLength={5}
+                    maxGuesses={maxAttempts}
+                    compact={true}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="text-md font-medium mb-2 text-center">Enter your next guess:</h3>
+                <div className="flex justify-center mb-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`
+                        w-10 h-10 border-2 flex items-center justify-center 
+                        font-bold text-xl mx-1 rounded
+                        ${
+                          nextGuess[i]
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700"
+                            : "border-gray-300 dark:border-gray-600"
+                        }
+                      `}
+                    >
+                      {nextGuess[i] ? nextGuess[i].toUpperCase() : ""}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-center mt-4">
+                  <VirtualKeyboard
+                    onKeyPress={handleKeyPress}
+                    keyStates={keyStates}
+                    compact={true}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between items-center mt-4">
+            {!(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-0">
+                {maxAttempts - guessesUsed} guesses remaining
+              </p>
+            )}
+            {(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
+              <Button onClick={onClose}>
+                Play Again
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -280,15 +363,12 @@ const GuessModal: React.FC<GuessModalProps> = ({
           isOpen={true}
           onClose={() => {}}
           currentGuess={modal.guess}
-          previousGuesses={allGuesses.slice(
-            0,
-            allGuesses.length - nestedModals.length + modal.level - 1,
-          )}
+          previousGuesses={allGuesses.slice(0, allGuesses.indexOf(modal.guess))}
           targetWord={targetWord}
           maxAttempts={maxAttempts}
           onGameOver={onGameOver}
           isNestedModal={true}
-          nestedLevel={modal.level + 1}
+          nestedLevel={modal.level}
           totalGuessesUsed={modal.guessNumber}
         />
       ))}

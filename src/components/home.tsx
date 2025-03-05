@@ -1,25 +1,27 @@
 import React, { useState } from "react";
 import GameBoard from "./GameBoard";
 import GameOverModal from "./GameOverModal";
-import ConfettiEffect from "./ConfettiEffect";
 
 const Home: React.FC = () => {
   // Game state
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [isWinner, setIsWinner] = useState<boolean>(false);
   const [attempts, setAttempts] = useState<number>(0);
-  const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [key, setKey] = useState<number>(0); // Used to reset the game
+  const [guesses, setGuesses] = useState<Array<{
+    word: string;
+    result: Array<"correct" | "present" | "absent" | "empty">;
+  }>>([]);
 
   // Handle game over event
-  const handleGameOver = (won: boolean, attemptCount: number) => {
+  const handleGameOver = (won: boolean, attemptCount: number, finalGuesses: Array<{
+    word: string;
+    result: Array<"correct" | "present" | "absent" | "empty">;
+  }>) => {
     setIsWinner(won);
     setAttempts(attemptCount);
+    setGuesses(finalGuesses);
     setGameOver(true);
-
-    if (won) {
-      setShowConfetti(true);
-    }
   };
 
   // Reset the game
@@ -27,7 +29,7 @@ const Home: React.FC = () => {
     setGameOver(false);
     setIsWinner(false);
     setAttempts(0);
-    setShowConfetti(false);
+    setGuesses([]);
     setKey((prev) => prev + 1); // Force re-render of GameBoard
   };
 
@@ -39,7 +41,7 @@ const Home: React.FC = () => {
           key={key}
           onGameOver={handleGameOver}
           targetWord="MODAL"
-          maxAttempts={5}
+          maxAttempts={6}
         />
       </div>
 
@@ -51,12 +53,10 @@ const Home: React.FC = () => {
           onPlayAgain={handlePlayAgain}
           isWinner={isWinner}
           attempts={attempts}
-          maxAttempts={5}
+          maxAttempts={6}
+          guesses={guesses}
         />
       )}
-
-      {/* Confetti effect when winning */}
-      {showConfetti && <ConfettiEffect isActive={showConfetti} />}
     </div>
   );
 };
