@@ -159,6 +159,11 @@ const GameBoard: React.FC<GameBoardProps> = ({
         <p className="text-gray-600 dark:text-gray-300">
           like Wordle, but the word is always MODAL
         </p>
+        <p className="text-gray-600 dark:text-gray-300 text-sm">
+          <a href="https://www.shah3d.com" className="text-blue-500">
+            Shahed
+          </a>
+        </p>
       </div>
 
       {/* Letter Grid - only shown before first incorrect guess */}

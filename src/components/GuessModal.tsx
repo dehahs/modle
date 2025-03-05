@@ -236,11 +236,11 @@ const GuessModal: React.FC<GuessModalProps> = ({
               ? `calc(800px - ${nestedLevel * 80}px)` 
               : '800px',
             height: isNestedModal 
-              ? `calc(80vh - ${nestedLevel * 80}px)` 
-              : '80vh',
+              ? `calc(90vh - ${nestedLevel * 80}px)` 
+              : '90vh',
             maxHeight: isNestedModal 
-              ? `calc(800px - ${nestedLevel * 80}px)` 
-              : '800px',
+              ? `calc(900px - ${nestedLevel * 80}px)` 
+              : '900px',
             position: 'fixed',
             top: '50%',
             left: '50%',
@@ -281,6 +281,11 @@ const GuessModal: React.FC<GuessModalProps> = ({
               {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))
                 ? `The word was ${targetWord.toUpperCase()}`
                 : "like Wordle, but the word is always MODAL"}
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          <a href="https://www.shah3d.com" className="text-blue-500">
+                            Shahed
+                          </a>
+                        </p>
             </DialogDescription>
           </DialogHeader>
 
@@ -344,9 +349,9 @@ const GuessModal: React.FC<GuessModalProps> = ({
             </div>
           )}
 
-          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between items-center mt-4">
+          <DialogFooter className="absolute bottom-0 left-0 flex justify-center items-center p-2">
             {!(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-0">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {displayRemainingGuesses} guesses remaining
               </p>
             )}
