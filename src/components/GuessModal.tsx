@@ -37,6 +37,7 @@ interface GuessModalProps {
   }>) => void;
   attemptNumber?: number;
   totalGuessesUsed?: number;
+  frozenRemainingGuesses?: number;
 }
 
 const GuessModal: React.FC<GuessModalProps> = ({
@@ -52,6 +53,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
   onGameOver = () => {},
   attemptNumber = 1,
   totalGuessesUsed = 1, // Default to 1 since we're showing this after the first guess
+  frozenRemainingGuesses,
 }) => {
   // State for the next guess input
   const [nextGuess, setNextGuess] = useState<string>("");
@@ -75,6 +77,14 @@ const GuessModal: React.FC<GuessModalProps> = ({
     }>
   >([]);
   const [guessesUsed, setGuessesUsed] = useState<number>(totalGuessesUsed);
+
+  // Calculate the remaining guesses, using frozenRemainingGuesses if provided
+  // If it's the first modal and no frozenRemainingGuesses, always show maxAttempts - 1
+  const displayRemainingGuesses = frozenRemainingGuesses !== undefined 
+    ? frozenRemainingGuesses 
+    : (!isNestedModal 
+      ? maxAttempts - 1  // Always show 5 for the first modal
+      : maxAttempts - guessesUsed);
 
   // Handle key press for the virtual keyboard
   const handleKeyPress = (key: string) => {
@@ -337,7 +347,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
           <DialogFooter className="flex flex-col sm:flex-row sm:justify-between items-center mt-4">
             {!(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-0">
-                {maxAttempts - guessesUsed} guesses remaining
+                {displayRemainingGuesses} guesses remaining
               </p>
             )}
             {(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
@@ -363,6 +373,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
           isNestedModal={true}
           nestedLevel={modal.level}
           totalGuessesUsed={modal.guessNumber}
+          frozenRemainingGuesses={maxAttempts - guessesUsed}
         />
       ))}
     </>
