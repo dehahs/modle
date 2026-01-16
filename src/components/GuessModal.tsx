@@ -392,14 +392,6 @@ const GuessModal: React.FC<GuessModalProps> = ({
           </div>
 
           <DialogFooter className="sticky bottom-0 left-0 right-0 flex justify-center items-center p-2 sm:p-4 bg-white border-t">
-            {!(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                {displayRemainingGuesses > 1 
-                  ? `${displayRemainingGuesses} guesses remaining` 
-                  : `${displayRemainingGuesses} guess remaining`}
-
-              </p>
-            )}
             {(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) && (
               <Button onClick={onClose} className="w-full sm:w-auto">
                 Play Again
