@@ -271,26 +271,21 @@ const GuessModal: React.FC<GuessModalProps> = ({
             </ClickTooltip>
           </div>
 
-          <DialogHeader className="mb-0">
+          <DialogHeader>
             <DialogTitle className="text-center text-xl font-bold">
               {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct")) 
                 ? "Game Over" 
                 : "Modle"}
             </DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogDescription className="text-center text-sm">
               {guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))
                 ? `The word was ${targetWord.toUpperCase()}`
                 : "like Wordle, but the word is always MODAL"}
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
-                          <a href="https://www.shah3d.com" className="text-blue-500">
-                            Shahed
-                          </a>
-                        </p>
             </DialogDescription>
           </DialogHeader>
 
           {(guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) ? (
-            <div className="space-y-4 my-0">
+            <div className="space-y-2">
               <h3 className="text-lg font-semibold text-center">Your Guesses:</h3>
               <div className="flex justify-center">
                 <LetterGrid
@@ -303,7 +298,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="space-y-4 my-0">
+            <div className="space-y-2">
               <div className="flex flex-col items-center">
                 {/* <h3 className="text-md font-medium mb-2">Previous Guesses:</h3> */}
                 <div className="flex justify-center">
@@ -338,12 +333,28 @@ const GuessModal: React.FC<GuessModalProps> = ({
                     </div>
                   ))}
                 </div> */}
-                <div className="flex justify-center mt-4">
-                  <VirtualKeyboard
-                    onKeyPress={handleKeyPress}
-                    keyStates={keyStates}
-                    compact={true}
-                  />
+                <div className="flex flex-col items-center">
+                  <div className="flex justify-center">
+                    <VirtualKeyboard
+                      onKeyPress={handleKeyPress}
+                      keyStates={keyStates}
+                      compact={true}
+                    />
+                  </div>
+                  {/* Shahed Link */}
+                  <div className="mt-4 text-center">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      An experiment by{" "}
+                      <a 
+                        href="https://www.shah3d.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-500"
+                      >
+                        Shahed
+                      </a>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

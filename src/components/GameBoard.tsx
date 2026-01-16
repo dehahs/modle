@@ -152,17 +152,12 @@ const GameBoard: React.FC<GameBoardProps> = ({
   return (
     <div className="flex flex-col items-center justify-between h-full p-4 bg-gray-50 dark:bg-gray-900">
       {/* Game Title */}
-      <div className="text-center mb-4">
+      <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-2 text-gray-800 dark:text-gray-100">
           Modle
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
           like Wordle, but the word is always MODAL
-        </p>
-        <p className="text-gray-600 dark:text-gray-300 text-sm">
-          <a href="https://www.shah3d.com" className="text-blue-500">
-            Shahed
-          </a>
         </p>
       </div>
 
@@ -179,6 +174,21 @@ const GameBoard: React.FC<GameBoardProps> = ({
       {/* Virtual Keyboard - only shown before first incorrect guess */}
       <div className="mt-4 w-full max-w-lg">
         <VirtualKeyboard onKeyPress={handleKeyPress} keyStates={keyStates} />
+      </div>
+
+      {/* Shahed Link */}
+      <div className="mt-4 text-center">
+        <p className="text-gray-600 dark:text-gray-300 text-sm">
+          An experiment by{" "}
+          <a 
+            href="https://www.shah3d.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500"
+          >
+            Shahed
+          </a>
+        </p>
       </div>
 
       {/* Modal for first incorrect guess - all game state is managed here after first incorrect guess */}

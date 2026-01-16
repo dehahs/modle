@@ -109,7 +109,7 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
         {/* Display all guesses */}
         {guesses.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-sm font-medium mb-2 text-center">Your Guesses:</h3>
+            <h3 className="text-sm font-medium mb-6 text-center">Your Guesses:</h3>
             <div className="scale-[0.75] origin-top transform -translate-y-2">
               <LetterGrid
                 guesses={guesses.map(g => g.word)}
