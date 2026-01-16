@@ -3,6 +3,12 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
+import { initializeFullDictionary } from "./lib/dictionary";
+
+// Initialize the full Wordle dictionary on app startup
+initializeFullDictionary().catch((error) => {
+  console.warn("Failed to load full dictionary, using fallback:", error);
+});
 
 // Only load Tempo devtools when enabled
 if (import.meta.env.VITE_TEMPO === "true") {

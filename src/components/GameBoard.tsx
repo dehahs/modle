@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import LetterGrid from "./LetterGrid";
 import VirtualKeyboard from "./VirtualKeyboard";
 import GuessModal from "./GuessModal";
+import { isValidWord } from "../lib/dictionary";
 
 interface GameBoardProps {
   onGameOver?: (won: boolean, attempts: number, guesses: Array<{
@@ -35,6 +36,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
     word: string;
     result: Array<"correct" | "present" | "absent" | "empty">;
   } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Check a guess against the target word
   const checkGuess = (
@@ -73,6 +75,17 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const submitGuess = useCallback(() => {
     if (currentGuess.length !== targetWord.length) return;
 
+    // Check if word is in dictionary
+    if (!isValidWord(currentGuess)) {
+      setErrorMessage("Not a valid word");
+      // Clear error message after 2 seconds
+      setTimeout(() => setErrorMessage(""), 2000);
+      return;
+    }
+
+    // Clear any previous error message
+    setErrorMessage("");
+
     const result = checkGuess(currentGuess, targetWord);
     const newGuess = { word: currentGuess, result };
 
@@ -93,21 +106,19 @@ const GameBoard: React.FC<GameBoardProps> = ({
       return newKeyStates;
     });
 
-    setGuesses((prev) => {
-      const updatedGuesses = [...prev, newGuess];
-      
+    const updatedGuesses = [...guesses, newGuess];
+    
       // Check if the game is over
       if (currentGuess === targetWord) {
         setGameStatus("won");
+        setGuesses(updatedGuesses);
         onGameOver(true, 1, updatedGuesses); // First guess was correct
       } else {
         // First incorrect guess - switch to modal mode
+        setGuesses(updatedGuesses);
         setFirstIncorrectGuess(newGuess);
         setGameStatus("modal");
       }
-      
-      return updatedGuesses;
-    });
     setCurrentGuess("");
   }, [currentGuess, targetWord, onGameOver]);
 
@@ -202,6 +213,13 @@ const GameBoard: React.FC<GameBoardProps> = ({
         <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 px-2">
           like Wordle, but the word is always MODAL
         </p>
+        {errorMessage && (
+          <div className="mt-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md">
+            <p className="text-sm text-red-600 dark:text-red-400 font-semibold text-center">
+              {errorMessage}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Letter Grid - only shown before first incorrect guess */}

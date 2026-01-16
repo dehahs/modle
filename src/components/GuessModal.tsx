@@ -14,6 +14,7 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import {
   ClickTooltip,
 } from "./ui/tooltip";
+import { isValidWord } from "../lib/dictionary";
 
 interface GuessModalProps {
   isOpen?: boolean;
@@ -77,6 +78,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
     }>
   >([]);
   const [guessesUsed, setGuessesUsed] = useState<number>(totalGuessesUsed);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Calculate the remaining guesses, using frozenRemainingGuesses if provided
   // If it's the first modal and no frozenRemainingGuesses, always show maxAttempts - 1
@@ -120,8 +122,19 @@ const GuessModal: React.FC<GuessModalProps> = ({
   };
 
   // Submit a guess
-  const submitGuess = useCallback((guess: string) => {
-    if (guess.length !== targetWord.length) return;
+  const submitGuess = useCallback((guess: string): boolean => {
+    if (guess.length !== targetWord.length) return false;
+
+    // Check if word is in dictionary
+    if (!isValidWord(guess)) {
+      setErrorMessage("Not a valid word");
+      // Clear error message after 2 seconds
+      setTimeout(() => setErrorMessage(""), 2000);
+      return false;
+    }
+
+    // Clear any previous error message
+    setErrorMessage("");
 
     const result = checkGuess(guess, targetWord);
     const newGuess = { word: guess, result };
@@ -159,6 +172,8 @@ const GuessModal: React.FC<GuessModalProps> = ({
 
       return newGuessesUsed;
     });
+
+    return true;
   }, [targetWord, maxAttempts, onGameOver, isNestedModal, nestedLevel, checkGuess]);
 
   // Handle key press for the virtual keyboard
@@ -170,8 +185,11 @@ const GuessModal: React.FC<GuessModalProps> = ({
 
     if (key === "ENTER") {
       if (nextGuess.length === 5) {
-        submitGuess(nextGuess);
-        setNextGuess("");
+        const isValid = submitGuess(nextGuess);
+        // Only clear the guess if it was valid
+        if (isValid) {
+          setNextGuess("");
+        }
       }
     } else if (key === "BACKSPACE") {
       setNextGuess((prev) => prev.slice(0, -1));
@@ -331,6 +349,13 @@ const GuessModal: React.FC<GuessModalProps> = ({
                 ? `The word was ${targetWord.toUpperCase()}`
                 : "like Wordle, but the word is always MODAL"}
             </DialogDescription>
+            {errorMessage && (
+              <div className="mt-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md">
+                <p className="text-sm text-red-600 dark:text-red-400 font-semibold text-center">
+                  {errorMessage}
+                </p>
+              </div>
+            )}
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto pb-16">
