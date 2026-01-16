@@ -39,12 +39,12 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent 
-        className="p-4 overflow-y-auto max-h-[90vh]"
+        className="p-2 sm:p-4 overflow-y-auto"
         onOpenAutoFocus={(e) => e.preventDefault()}
         style={{
           width: '95%',
           maxWidth: '600px',
-          height: '80vh',
+          height: '90vh',
           maxHeight: '800px',
           position: 'fixed',
           top: '50%',
@@ -80,26 +80,26 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
         {isWinner && <ConfettiEffect isActive={true} />}
         
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-center">
             {isWinner ? "Congratulations!" : "Game Over"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="py-4 text-center">
+        <div className="py-2 sm:py-4 text-center px-2">
           {isWinner ? (
-            <p className="text-lg mb-2">
+            <p className="text-base sm:text-lg mb-2">
               You guessed the word{" "}
               <span className="font-bold text-green-500">MODAL</span> in{" "}
               <span className="font-bold">{attempts}</span>{" "}
               {attempts === 1 ? "attempt" : "attempts"}!
             </p>
           ) : (
-            <p className="text-lg mb-2">
+            <p className="text-base sm:text-lg mb-2">
               You've used all {maxAttempts} attempts. The word was{" "}
               <span className="font-bold text-green-500">MODAL</span>.
             </p>
           )}
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">
             {isWinner
               ? "Great job! Would you like to play again?"
               : "Better luck next time! Would you like to try again?"}
@@ -108,9 +108,9 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
 
         {/* Display all guesses */}
         {guesses.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-medium mb-6 text-center">Your Guesses:</h3>
-            <div className="scale-[0.75] origin-top transform -translate-y-2">
+          <div className="mb-4 sm:mb-6 overflow-x-auto">
+            <h3 className="text-xs sm:text-sm font-medium mb-3 sm:mb-6 text-center">Your Guesses:</h3>
+            <div className="flex justify-center">
               <LetterGrid
                 guesses={guesses.map(g => g.word)}
                 statuses={guesses.map(g => g.result)}
@@ -122,10 +122,10 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
           </div>
         )}
 
-        <DialogFooter className="flex justify-center sm:justify-center gap-2">
+        <DialogFooter className="flex justify-center sm:justify-center gap-2 pb-2 sm:pb-4">
           <Button
             onClick={onPlayAgain}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg"
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg w-full sm:w-auto"
           >
             Play Again
           </Button>

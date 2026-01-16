@@ -34,9 +34,9 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
       {/* Main game container */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-4">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
         <GameBoard
           key={key}
           onGameOver={handleGameOver}

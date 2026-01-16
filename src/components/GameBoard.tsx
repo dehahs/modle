@@ -193,19 +193,19 @@ const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-between h-full p-4 bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-2 sm:p-4 bg-gray-50 dark:bg-gray-900 gap-3 sm:gap-4 md:gap-6">
       {/* Game Title */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-2 text-gray-800 dark:text-gray-100">
+      <div className="text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0.5 sm:mb-1 text-gray-800 dark:text-gray-100">
           Modle
         </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 px-2">
           like Wordle, but the word is always MODAL
         </p>
       </div>
 
       {/* Letter Grid - only shown before first incorrect guess */}
-      <div className="flex-grow flex items-center justify-center w-full">
+      <div className="flex items-center justify-center w-full">
         <LetterGrid
           guesses={getAllGuesses().map(g => g.word)}
           statuses={getAllGuesses().map(g => g.result)}
@@ -215,13 +215,13 @@ const GameBoard: React.FC<GameBoardProps> = ({
       </div>
 
       {/* Virtual Keyboard - only shown before first incorrect guess */}
-      <div className="mt-4 w-full max-w-lg">
+      <div className="w-full max-w-lg px-2 sm:px-4">
         <VirtualKeyboard onKeyPress={handleKeyPress} keyStates={keyStates} />
       </div>
 
       {/* Shahed Link */}
-      <div className="mt-4 text-center">
-        <p className="text-gray-600 dark:text-gray-300 text-sm">
+      <div className="text-center">
+        <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
           An experiment by{" "}
           <a 
             href="https://www.shah3d.com" 

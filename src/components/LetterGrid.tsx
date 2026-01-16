@@ -28,7 +28,9 @@ const LetterBox: React.FC<LetterBoxProps> = ({
     <div
       className={`
         ${getBackgroundColor()}
-        ${compact ? 'w-8 h-8 text-sm' : 'w-12 h-12 text-2xl'}
+        ${compact 
+          ? 'w-7 h-7 sm:w-8 sm:h-8 text-xs sm:text-sm' 
+          : 'w-10 h-10 sm:w-12 sm:h-12 text-lg sm:text-xl md:text-2xl'}
         border-2 flex items-center justify-center font-bold rounded
         transition-colors duration-500
       `}
@@ -84,7 +86,7 @@ const LetterGrid: React.FC<LetterGridProps> = ({
       const letters = typeof guess === 'string' ? guess.split("") : [];
       
       allRows.push(
-        <div key={i} className="flex gap-1 mb-1">
+        <div key={i} className="flex gap-0.5 sm:gap-1 mb-1 sm:mb-1.5 justify-center">
           {Array.from({ length: wordLength }).map((_, j) => (
             <LetterBox
               key={j}
@@ -98,7 +100,7 @@ const LetterGrid: React.FC<LetterGridProps> = ({
     } else if (i === processedGuesses.length) {
       // This is the current guess row
       allRows.push(
-        <div key={i} className="flex gap-1 mb-1">
+        <div key={i} className="flex gap-0.5 sm:gap-1 mb-1 sm:mb-1.5 justify-center">
           {Array.from({ length: wordLength }).map((_, j) => (
             <LetterBox
               key={j}
@@ -111,7 +113,7 @@ const LetterGrid: React.FC<LetterGridProps> = ({
     } else {
       // This is an empty row
       allRows.push(
-        <div key={i} className="flex gap-1 mb-1">
+        <div key={i} className="flex gap-0.5 sm:gap-1 mb-1 sm:mb-1.5 justify-center">
           {Array.from({ length: wordLength }).map((_, j) => (
             <LetterBox key={j} compact={compact} />
           ))}
