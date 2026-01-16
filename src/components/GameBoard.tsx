@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import LetterGrid from "./LetterGrid";
 import VirtualKeyboard from "./VirtualKeyboard";
 import GuessModal from "./GuessModal";
@@ -36,55 +36,6 @@ const GameBoard: React.FC<GameBoardProps> = ({
     result: Array<"correct" | "present" | "absent" | "empty">;
   } | null>(null);
 
-  // Process a letter key press (only for the first guess)
-  const handleKeyPress = (key: string) => {
-    if (gameStatus !== "playing") return;
-
-    if (key === "ENTER") {
-      submitGuess();
-    } else if (key === "BACKSPACE") {
-      setCurrentGuess((prev) => prev.slice(0, -1));
-    } else if (currentGuess.length < targetWord.length && /^[A-Z]$/.test(key)) {
-      setCurrentGuess((prev) => prev + key);
-    }
-  };
-
-  // Check the current guess against the target word
-  const submitGuess = () => {
-    if (currentGuess.length !== targetWord.length) return;
-
-    const result = checkGuess(currentGuess, targetWord);
-    const newGuess = { word: currentGuess, result };
-
-    // Update key states for the virtual keyboard
-    const newKeyStates = { ...keyStates };
-    currentGuess.split("").forEach((letter, index) => {
-      const status = result[index];
-      // Only update if the current status is better than the existing one
-      if (
-        status === "correct" ||
-        (status === "present" && newKeyStates[letter] !== "correct") ||
-        (status === "absent" && !newKeyStates[letter])
-      ) {
-        newKeyStates[letter] = status;
-      }
-    });
-
-    setKeyStates(newKeyStates);
-    setGuesses((prev) => [...prev, newGuess]);
-    setCurrentGuess("");
-
-    // Check if the game is over
-    if (currentGuess === targetWord) {
-      setGameStatus("won");
-      onGameOver(true, 1, [...guesses, newGuess]); // First guess was correct
-    } else {
-      // First incorrect guess - switch to modal mode
-      setFirstIncorrectGuess(newGuess);
-      setGameStatus("modal");
-    }
-  };
-
   // Check a guess against the target word
   const checkGuess = (
     guess: string,
@@ -117,6 +68,98 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
     return result;
   };
+
+  // Check the current guess against the target word
+  const submitGuess = useCallback(() => {
+    if (currentGuess.length !== targetWord.length) return;
+
+    const result = checkGuess(currentGuess, targetWord);
+    const newGuess = { word: currentGuess, result };
+
+    // Update key states for the virtual keyboard
+    setKeyStates((prevKeyStates) => {
+      const newKeyStates = { ...prevKeyStates };
+      currentGuess.split("").forEach((letter, index) => {
+        const status = result[index];
+        // Only update if the current status is better than the existing one
+        if (
+          status === "correct" ||
+          (status === "present" && newKeyStates[letter] !== "correct") ||
+          (status === "absent" && !newKeyStates[letter])
+        ) {
+          newKeyStates[letter] = status;
+        }
+      });
+      return newKeyStates;
+    });
+
+    setGuesses((prev) => {
+      const updatedGuesses = [...prev, newGuess];
+      
+      // Check if the game is over
+      if (currentGuess === targetWord) {
+        setGameStatus("won");
+        onGameOver(true, 1, updatedGuesses); // First guess was correct
+      } else {
+        // First incorrect guess - switch to modal mode
+        setFirstIncorrectGuess(newGuess);
+        setGameStatus("modal");
+      }
+      
+      return updatedGuesses;
+    });
+    setCurrentGuess("");
+  }, [currentGuess, targetWord, onGameOver]);
+
+  // Process a letter key press (only for the first guess)
+  const handleKeyPress = useCallback((key: string) => {
+    if (gameStatus !== "playing") return;
+
+    if (key === "ENTER") {
+      submitGuess();
+    } else if (key === "BACKSPACE") {
+      setCurrentGuess((prev) => prev.slice(0, -1));
+    } else if (currentGuess.length < targetWord.length && /^[A-Z]$/.test(key)) {
+      setCurrentGuess((prev) => prev + key);
+    }
+  }, [gameStatus, currentGuess, targetWord.length, submitGuess]);
+
+  // Handle physical keyboard input
+  useEffect(() => {
+    const handleKeyboardInput = (event: KeyboardEvent) => {
+      // Don't handle keyboard input if game is not playing
+      if (gameStatus !== "playing") return;
+
+      // Don't handle if user is typing in an input field
+      const target = event.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
+
+      const key = event.key.toUpperCase();
+
+      // Handle Enter key
+      if (key === "ENTER") {
+        event.preventDefault();
+        handleKeyPress("ENTER");
+      }
+      // Handle Backspace key
+      else if (key === "BACKSPACE") {
+        event.preventDefault();
+        handleKeyPress("BACKSPACE");
+      }
+      // Handle letter keys (A-Z)
+      else if (/^[A-Z]$/.test(key)) {
+        event.preventDefault();
+        handleKeyPress(key);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboardInput);
+    return () => {
+      window.removeEventListener("keydown", handleKeyboardInput);
+    };
+  }, [gameStatus, handleKeyPress]);
 
   // Handle game over from the modal
   const handleModalGameOver = (won: boolean, attempts: number, modalGuesses: Array<{

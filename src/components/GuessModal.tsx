@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -86,45 +86,6 @@ const GuessModal: React.FC<GuessModalProps> = ({
       ? maxAttempts - 1  // Always show 5 for the first modal
       : maxAttempts - guessesUsed);
 
-  // Handle key press for the virtual keyboard
-  const handleKeyPress = (key: string) => {
-    if (key === "ENTER") {
-      if (nextGuess.length === 5) {
-        submitGuess(nextGuess);
-        setNextGuess("");
-      }
-    } else if (key === "BACKSPACE") {
-      setNextGuess((prev) => prev.slice(0, -1));
-    } else if (nextGuess.length < 5 && /^[A-Z]$/.test(key)) {
-      setNextGuess((prev) => prev + key);
-    }
-  };
-
-  // Update key states based on previous guesses
-  React.useEffect(() => {
-    const newKeyStates: Record<
-      string,
-      "correct" | "present" | "absent" | "default"
-    > = {};
-
-    allGuesses.forEach((guess) => {
-      guess.word.split("").forEach((letter, index) => {
-        if (!letter) return; // Skip empty letters
-
-        const status = guess.result[index];
-        if (
-          status === "correct" ||
-          (status === "present" && newKeyStates[letter] !== "correct") ||
-          (status === "absent" && !newKeyStates[letter])
-        ) {
-          newKeyStates[letter] = status;
-        }
-      });
-    });
-
-    setKeyStates(newKeyStates);
-  }, [allGuesses]);
-
   // Check a guess against the target word
   const checkGuess = (
     guess: string,
@@ -159,42 +120,130 @@ const GuessModal: React.FC<GuessModalProps> = ({
   };
 
   // Submit a guess
-  const submitGuess = (guess: string) => {
+  const submitGuess = useCallback((guess: string) => {
     if (guess.length !== targetWord.length) return;
-
-    // Increment the number of guesses used
-    const newGuessesUsed = guessesUsed + 1;
-    setGuessesUsed(newGuessesUsed);
 
     const result = checkGuess(guess, targetWord);
     const newGuess = { word: guess, result };
 
-    // Add to all guesses
-    const updatedGuesses = [...allGuesses, newGuess];
-    setAllGuesses(updatedGuesses);
-
-    // Check if game is over
-    if (guess === targetWord) {
-      // Win condition
-      onGameOver(true, newGuessesUsed, updatedGuesses);
-    } else if (newGuessesUsed >= maxAttempts) {
-      // Lose condition
-      onGameOver(false, maxAttempts, updatedGuesses);
-    } else {
-      // Continue with a new nested modal
-      // For the first nested modal, use level 1
-      const newNestedLevel = isNestedModal ? nestedLevel + 1 : 1;
+    setGuessesUsed((prevGuessesUsed) => {
+      const newGuessesUsed = prevGuessesUsed + 1;
       
-      setNestedModals([
-        ...nestedModals,
-        {
-          guess: newGuess,
-          level: newNestedLevel,
-          guessNumber: newGuessesUsed,
-        },
-      ]);
+      setAllGuesses((prevAllGuesses) => {
+        const updatedGuesses = [...prevAllGuesses, newGuess];
+
+        // Check if game is over
+        if (guess === targetWord) {
+          // Win condition
+          onGameOver(true, newGuessesUsed, updatedGuesses);
+        } else if (newGuessesUsed >= maxAttempts) {
+          // Lose condition
+          onGameOver(false, maxAttempts, updatedGuesses);
+        } else {
+          // Continue with a new nested modal
+          // For the first nested modal, use level 1
+          const newNestedLevel = isNestedModal ? nestedLevel + 1 : 1;
+          
+          setNestedModals((prevNestedModals) => [
+            ...prevNestedModals,
+            {
+              guess: newGuess,
+              level: newNestedLevel,
+              guessNumber: newGuessesUsed,
+            },
+          ]);
+        }
+
+        return updatedGuesses;
+      });
+
+      return newGuessesUsed;
+    });
+  }, [targetWord, maxAttempts, onGameOver, isNestedModal, nestedLevel, checkGuess]);
+
+  // Handle key press for the virtual keyboard
+  const handleKeyPress = useCallback((key: string) => {
+    // Don't handle if game is over
+    if (guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) {
+      return;
     }
-  };
+
+    if (key === "ENTER") {
+      if (nextGuess.length === 5) {
+        submitGuess(nextGuess);
+        setNextGuess("");
+      }
+    } else if (key === "BACKSPACE") {
+      setNextGuess((prev) => prev.slice(0, -1));
+    } else if (nextGuess.length < 5 && /^[A-Z]$/.test(key)) {
+      setNextGuess((prev) => prev + key);
+    }
+  }, [guessesUsed, maxAttempts, allGuesses, nextGuess, submitGuess]);
+
+  // Handle physical keyboard input
+  React.useEffect(() => {
+    const handleKeyboardInput = (event: KeyboardEvent) => {
+      // Don't handle if game is over
+      if (guessesUsed >= maxAttempts || allGuesses.some(g => g.result.every(r => r === "correct"))) {
+        return;
+      }
+
+      // Don't handle if user is typing in an input field
+      const target = event.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
+
+      const key = event.key.toUpperCase();
+
+      // Handle Enter key
+      if (key === "ENTER") {
+        event.preventDefault();
+        handleKeyPress("ENTER");
+      }
+      // Handle Backspace key
+      else if (key === "BACKSPACE") {
+        event.preventDefault();
+        handleKeyPress("BACKSPACE");
+      }
+      // Handle letter keys (A-Z)
+      else if (/^[A-Z]$/.test(key)) {
+        event.preventDefault();
+        handleKeyPress(key);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboardInput);
+    return () => {
+      window.removeEventListener("keydown", handleKeyboardInput);
+    };
+  }, [guessesUsed, maxAttempts, allGuesses, handleKeyPress]);
+
+  // Update key states based on previous guesses
+  React.useEffect(() => {
+    const newKeyStates: Record<
+      string,
+      "correct" | "present" | "absent" | "default"
+    > = {};
+
+    allGuesses.forEach((guess) => {
+      guess.word.split("").forEach((letter, index) => {
+        if (!letter) return; // Skip empty letters
+
+        const status = guess.result[index];
+        if (
+          status === "correct" ||
+          (status === "present" && newKeyStates[letter] !== "correct") ||
+          (status === "absent" && !newKeyStates[letter])
+        ) {
+          newKeyStates[letter] = status;
+        }
+      });
+    });
+
+    setKeyStates(newKeyStates);
+  }, [allGuesses]);
+
 
   // Create empty boxes for the next guess
   const getEmptyBoxes = () => {
