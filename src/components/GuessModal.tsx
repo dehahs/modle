@@ -349,13 +349,6 @@ const GuessModal: React.FC<GuessModalProps> = ({
                 ? `The word was ${targetWord.toUpperCase()}`
                 : "like Wordle, but the word is always MODAL"}
             </DialogDescription>
-            {errorMessage && (
-              <div className="mt-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md">
-                <p className="text-sm text-red-600 dark:text-red-400 font-semibold text-center">
-                  {errorMessage}
-                </p>
-              </div>
-            )}
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto pb-16">
@@ -383,6 +376,7 @@ const GuessModal: React.FC<GuessModalProps> = ({
                       wordLength={5}
                       maxGuesses={maxAttempts}
                       compact={true}
+                      errorMessage={errorMessage}
                     />
                   </div>
                 </div>

@@ -213,22 +213,17 @@ const GameBoard: React.FC<GameBoardProps> = ({
         <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 px-2">
           like Wordle, but the word is always MODAL
         </p>
-        {errorMessage && (
-          <div className="mt-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md">
-            <p className="text-sm text-red-600 dark:text-red-400 font-semibold text-center">
-              {errorMessage}
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Letter Grid - only shown before first incorrect guess */}
       <div className="flex items-center justify-center w-full">
         <LetterGrid
-          guesses={getAllGuesses().map(g => g.word)}
-          statuses={getAllGuesses().map(g => g.result)}
+          guesses={guesses.map(g => g.word)}
+          statuses={guesses.map(g => g.result)}
+          currentGuess={currentGuess}
           wordLength={targetWord.length}
           maxGuesses={maxAttempts}
+          errorMessage={errorMessage}
         />
       </div>
 

@@ -50,6 +50,7 @@ interface LetterGridProps {
   wordLength: number;
   maxGuesses: number;
   compact?: boolean;
+  errorMessage?: string;
 }
 
 const LetterGrid: React.FC<LetterGridProps> = ({
@@ -58,7 +59,8 @@ const LetterGrid: React.FC<LetterGridProps> = ({
   currentGuess = "",
   wordLength,
   maxGuesses,
-  compact = false
+  compact = false,
+  errorMessage
 }) => {
   // Handle both string arrays and object arrays for backward compatibility
   const processedGuesses: string[] = guesses.map((guess: any) => {
@@ -100,7 +102,14 @@ const LetterGrid: React.FC<LetterGridProps> = ({
     } else if (i === processedGuesses.length) {
       // This is the current guess row
       allRows.push(
-        <div key={i} className="flex gap-0.5 sm:gap-1 mb-1 sm:mb-1.5 justify-center">
+        <div key={i} className="relative flex gap-0.5 sm:gap-1 mb-1 sm:mb-1.5 justify-center items-center">
+          {errorMessage && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md shadow-lg whitespace-nowrap">
+              <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-semibold">
+                {errorMessage}
+              </p>
+            </div>
+          )}
           {Array.from({ length: wordLength }).map((_, j) => (
             <LetterBox
               key={j}
